@@ -1,0 +1,255 @@
+/*
+  rec03-base.cpp
+ */
+
+// Provided
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+using namespace std;
+
+//
+// Task 1: The Account struct. Call it AccountS
+//
+struct Accounts {
+    string name;
+    int number;
+};
+void readFile(ifstream& file) {
+    if (!file) {
+        cerr << "failed to open the file";
+        exit(1);
+    }
+
+}
+// Task 1 a
+vector<Accounts> fillVector(ifstream& file) {
+    string name;
+    int number;
+    vector<Accounts> memberCollection;
+    while (file >> name >> number) {
+        Accounts member;
+        member.name = name;
+        member.number = number;
+        memberCollection.push_back(member);
+    }
+
+    return memberCollection;
+}
+// Task 1 b
+vector<Accounts> fillVectorInitializer(ifstream& file) {
+    string name;
+    int number;
+    vector<Accounts> memberCollection;
+    while (file >> name >> number) {
+        Accounts aMember{ name, number };
+        memberCollection.push_back(aMember);
+    }
+
+    return memberCollection;
+}
+void displayAccounts(const Accounts& member) {
+    cout << "The name: " << member.name << " The number: " << member.number << endl;
+}
+
+//
+// Task 2: The Account class. Call it AccountC
+//
+class AccountC {
+    friend ostream& operator<<(ostream& os, const AccountC& member);
+public:
+    AccountC(string nameOf, int numberOf) : name(nameOf), number(numberOf) {}
+    /*string getName() const {
+        return name;
+    }
+    int getNumber() const {
+        return number;
+    }*/
+    void deposit(int numberOf, transaction order, vector<int> history) {
+        
+    }
+    void withdrawal(){}
+private:
+    string name;
+    int number;
+    vector<int> history;
+    transaction order;
+    int balance;
+};
+vector<AccountC> fillVectorAccountC(ifstream& file) {
+    string name;
+    int number;
+    vector<AccountC> memberCollection;
+    while (file >> name >> number) {
+        AccountC member{ name, number };
+        memberCollection.push_back(member);
+    }
+
+    return memberCollection;
+}
+vector<AccountC> fillVectorAccountCTemp(ifstream& file) {
+    string name;
+    int number;
+    vector<AccountC> memberCollection;
+    while (file >> name >> number) {
+        memberCollection.push_back(AccountC(name, number));
+    }
+
+    return memberCollection;
+}
+vector<AccountC> fillVectorAccountCEmplace(ifstream& file) {
+    string name;
+    int number;
+    vector<AccountC> memberCollection;
+    while (file >> name >> number) {
+        memberCollection.emplace_back(AccountC(name, number));
+    }
+    
+    return memberCollection;
+}
+// 2.b: AccountC output operator, not a friend.
+ostream& operator<<(ostream& os, const AccountC& member) {
+    //os << "Person: " << member.getName() << " Number: " << member.getNumber();
+    os << "Person: " << member.name << " Number: " << member.number;
+    return os;
+}
+// 2.2: AccountC output operator, reimplemented as a friend.
+
+void addAccount(vector<AccountC>& memberCollection, const AccountC& member) {
+    memberCollection.push_back(member);
+}
+void readTransaction(ifstream& file2) {
+    string firstWord;
+    vector<AccountC> TheAccountCollection;
+    while (file2 >> firstWord) {
+        if (firstWord == "Account") {
+            string name;
+            int number;
+            file2 >> name;
+            file2 >> number;
+            AccountC a{ name, number };
+            TheAccountCollection.push_back(a);
+
+        }
+    }
+}
+
+//
+// Task 3
+//
+// Transaction class definition
+class transaction {
+public:
+    transaction(int typeOf, int amountOf) : type(typeOf), amount(amountOf){}
+private:
+    int type; // if 1 then deposit if 0 then withdraw
+    int amount;
+};
+
+// Account class definition
+
+
+//
+// Task 4
+//
+// Transaction class definition with embedded Account class
+
+
+
+int main() {
+
+    //
+    // Task 1: account as struct
+    //
+    //      1a. Fill vector of account structs from file
+
+    cout << "Task1a:\n";
+    cout << "Filling vector of struct objects, define a local struct instance "
+         << " and set fields explicitly:\n";
+
+    ifstream file("accounts.txt");
+    readFile(file);
+    vector<Accounts> memberCollection = fillVector(file);
+    for (Accounts a : memberCollection) {
+        displayAccounts(a);
+    }
+    file.close();
+    // 1b
+    file.open("accounts.txt");
+    cout << "Task1b:\n";
+    cout << "Filling vector of struct objects, using {} initialization:\n";
+
+    vector<Accounts> memberCollection2 = fillVectorInitializer(file);
+    for (Accounts b : memberCollection2) {
+        displayAccounts(b);
+    }
+    //==================================
+    //
+    // Task 2: account as class
+    //
+
+    //      2a
+    cout << "==============\n";
+    cout << "\nTask2a:";
+    cout << "\nFilling vector of class objects, using local class object:\n";
+    file.close();
+    file.open("accounts.txt");
+    vector<AccountC> memberCollection3 = fillVectorAccountC(file);
+    for (AccountC c : memberCollection3) {
+        cout << c;
+    }
+    cout << "---\n";
+    cout << "\nTask2b:\n";
+    cout << "output using output operator with getters\n";
+    for (AccountC c : memberCollection3) {
+        cout << c;
+    }
+    
+    cout << "\nTask2c:\n";
+    cout << "output using output operator as friend without getters\n";
+    // Note code here will be same as above.
+    for (AccountC c : memberCollection3) {
+        cout << c;
+    }
+    file.close();
+
+
+
+    cout << "\nTask2d:\n";
+    cout << "Filling vector of class objects, using temporary class object:\n";
+    file.open("accounts.txt");
+    vector<AccountC> memberCollection4 = fillVectorAccountCTemp(file);
+    for (AccountC c : memberCollection4) {
+        cout << c;
+    }
+    file.close();
+    file.open("accounts.txt");
+
+    cout << "\nTask2e:\n";
+    cout << "\nFilling vector of class objects, using emplace_back:\n";
+    vector<AccountC> memberCollection5 = fillVectorAccountCEmplace(file);
+    for (AccountC c : memberCollection5) {
+        cout << c;
+    }
+    
+    // Task 3
+    cout << "\n";
+    cout << "==============\n";
+    cout << "\nTask 3:\n\nAccounts and Transaction:\n";
+    ifstream file2("transactions");
+    file2.open("transactions.txt");
+
+
+    
+
+
+
+    // Task 4
+    cout << "==============\n";
+    cout << "\nTask 4:\n\nAccounts and Transaction:\n"
+         << "Account class is nested inside Transaction class.\n";
+
+}
+
+
