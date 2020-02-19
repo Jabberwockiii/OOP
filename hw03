@@ -11,42 +11,130 @@ to apply data hiding, encapsulation, delegation, and operate overloading
 #include <vector>
 #include <fstream>
 using namespace std;
+
 class Warrior {
+public:
+	//consructor to access data
+	Warrior(string nameOf, string weaponNameOf, int weaponStrengthOf) : weaponName(weaponNameOf), weaponStrength(weaponStrengthOf) {}
+	string getName() {
+		return name;
+	}
+	string getWeaponName() {
+		return theWeapon.getWeaponName();
+	}
+	int getWeaponStrength() {
+		return theWeapon.getWeaponStrength();
+	}
+	void changeWeaponStrength(int& change) {
+		theWeapon.changeWeaponStrength(change);
+	}
+	void battles(Warrior enemy) {
+		cout << name << " battles " << enemy.getName() << endl;
+		if (theWeapon.getWeaponStrength() == 0 && enemy.getWeaponStrength() == 0) {
+			cout << "Oh, NO! They're both dead! Yuck!" << endl;
+		}
+		// when one of the warrior is dead
+		else if (theWeapon.getWeaponStrength() > enemy.getWeaponStrength()&&
+			enemy.getWeaponStrength() == 0) {
+			cout << "He's dead, " << name << endl;
+		}
+
+		else if (theWeapon.getWeaponStrength() > enemy.getWeaponStrength()) {
+			int change = theWeapon.getWeaponStrength() - enemy.getWeaponStrength();
+			int left = 0;
+			theWeapon.changeWeaponStrength(change);
+			enemy.changeWeaponStrength(left);
+			cout << name << " defeats " << enemy.getName() << endl;
+		}
+		else if (theWeapon.getWeaponStrength() < enemy.getWeaponStrength()
+			&& theWeapon.getWeaponStrength() == 0) {
+			cout << "He's dead, " << enemy.name << endl;
+		}
+		else if (theWeapon.getWeaponStrength() < enemy.getWeaponStrength()) {
+			int change = enemy.getWeaponStrength() - theWeapon.getWeaponStrength();
+			int left = 0;
+			enemy.changeWeaponStrength(change);
+			theWeapon.changeWeaponStrength(left);
+			cout << enemy.name << " defeats " << name << endl;
+		}
+		// mutual annihilation
+		else {
+			int left = 0;
+			enemy.changeWeaponStrength(left);
+			theWeapon.changeWeaponStrength(left);
+			cout << "Mutual Annihilation: " << name << " and " << enemy.name
+				<< " die at each other's hands" << endl; ;
+		}
+	}
 private:
 	class Weapon {
-		Weapon(string weaponName, int strength): weapon_name(weaponName),  Strength(strength){}
-		string weapon_name;
-		int Strength;
-
 	public:
+
+		Weapon(string weaponNameOf, int weaponStrengthOf) :
+			weapon_name(weaponNameOf), weapon_strength(weaponStrengthOf) {}
+		
 		string getWeaponName() {
 			return weapon_name;
 		}
 		int getWeaponStrength() {
-			return Strength;
+			return weapon_strength;
 		}
+		void changeWeaponStrength(int& change) {
+			int weapon_strength = change;
+		}
+
+	private:
+		string weapon_name;
+		int weapon_strength;
 	};
-
-	Warrior(string nameOf, Weapon weaponOf) : theWeapon(weaponOf), name(nameOf) {}
+	//all fields are private 
 	string name;
-	Weapon theWeapon;
-public:
-	void battle(Warrior& enemy) {
-
-	}
+	string weaponName;
+	int weaponStrength;
+	Weapon theWeapon{ name, weaponStrength };
 };
+ostream& operator <<(ostream& os, Warrior& warrior) {
+	os << "Warrior: " << warrior.getName() << ", weapon: "
+		<< warrior.getWeaponName() << ", " << warrior.getWeaponStrength() << endl;
+
+	return os;
+
+}
 
 void readFile(ifstream& file) {
 	string firstWord;
 	string name;
 	string weaponName;
+	string w1;
+	string w2;
 	int strength;
+	vector<Warrior> warriors;
 	while (file >> firstWord) {
 		if (firstWord == "Warrior") {
 			file >> name;
 			file >> weaponName;
 			file >> strength;
-			Warrior aWarrior{name,}
+			Warrior aWarrior{ name, weaponName, strength };
+			warriors.push_back(aWarrior);
+		}
+		else if (firstWord == "Status") {
+			cout << "There are " << warriors.size() << " warriors" << endl;
+			for (size_t i = 0; i < warriors.size(); ++i) {
+				cout << warriors[i];
+			}
+		}
+		else if (firstWord == "Battle") {
+			file >> w1;
+			file >> w2;
+			for (Warrior& aWarrior : warriors) {
+				if (aWarrior.getName() == w1) {
+					for (Warrior& bWarrior : warriors) {
+						if (bWarrior.getName() == w2) {
+							aWarrior.battles(bWarrior);
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -57,5 +145,5 @@ int main() {
 		exit(1);
 	}
 	readFile(file);
-	
+	file.close();
 }
