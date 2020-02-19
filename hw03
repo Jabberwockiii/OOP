@@ -1,0 +1,61 @@
+/*
+author: Jacob Xu
+date: 2/16/2020
+purpose: 
+to apply data hiding, encapsulation, delegation, and operate overloading
+*/
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+using namespace std;
+class Warrior {
+private:
+	class Weapon {
+		Weapon(string weaponName, int strength): weapon_name(weaponName),  Strength(strength){}
+		string weapon_name;
+		int Strength;
+
+	public:
+		string getWeaponName() {
+			return weapon_name;
+		}
+		int getWeaponStrength() {
+			return Strength;
+		}
+	};
+
+	Warrior(string nameOf, Weapon weaponOf) : theWeapon(weaponOf), name(nameOf) {}
+	string name;
+	Weapon theWeapon;
+public:
+	void battle(Warrior& enemy) {
+
+	}
+};
+
+void readFile(ifstream& file) {
+	string firstWord;
+	string name;
+	string weaponName;
+	int strength;
+	while (file >> firstWord) {
+		if (firstWord == "Warrior") {
+			file >> name;
+			file >> weaponName;
+			file >> strength;
+			Warrior aWarrior{name,}
+		}
+	}
+}
+int main() {
+	ifstream file("warriors.txt");
+	if (!file) {
+		cerr << "Failed to open the file!";
+		exit(1);
+	}
+	readFile(file);
+	
+}
