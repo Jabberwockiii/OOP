@@ -1,7 +1,7 @@
 /*
 author: Jacob Xu
 date: 2/16/2020
-purpose: 
+purpose:
 to apply data hiding, encapsulation, delegation, and operate overloading
 */
 
@@ -15,14 +15,15 @@ using namespace std;
 class Warrior {
 public:
 	//consructor to access data
-	Warrior(string nameOf, string weaponNameOf, int weaponStrengthOf) : weaponName(weaponNameOf), weaponStrength(weaponStrengthOf) {}
-	string getName() {
+	Warrior(const string& nameOf, const string& weaponNameOf, int& weaponStrengthOf) :
+		name(nameOf), weaponName(weaponNameOf), weaponStrength(weaponStrengthOf) {}
+	string getName()const {
 		return name;
 	}
-	string getWeaponName() {
+	string getWeaponName()const {
 		return theWeapon.getWeaponName();
 	}
-	int getWeaponStrength() {
+	int getWeaponStrength()const {
 		return theWeapon.getWeaponStrength();
 	}
 	void changeWeaponStrength(int& change) {
@@ -34,11 +35,12 @@ public:
 			cout << "Oh, NO! They're both dead! Yuck!" << endl;
 		}
 		// when one of the warrior is dead
-		else if (theWeapon.getWeaponStrength() > enemy.getWeaponStrength()&&
-			enemy.getWeaponStrength() == 0) {
+		else if (enemy.getWeaponStrength() == 0) {
 			cout << "He's dead, " << name << endl;
 		}
-
+		else if (theWeapon.getWeaponStrength() == 0) {
+			cout << "He's dead, " << enemy.name << endl;
+		}
 		else if (theWeapon.getWeaponStrength() > enemy.getWeaponStrength()) {
 			int change = theWeapon.getWeaponStrength() - enemy.getWeaponStrength();
 			int left = 0;
@@ -58,10 +60,10 @@ public:
 			cout << enemy.name << " defeats " << name << endl;
 		}
 		// mutual annihilation
-		else {
+		else if(theWeapon.getWeaponStrength() == enemy.getWeaponStrength()) {
 			int left = 0;
-			enemy.changeWeaponStrength(left);
 			theWeapon.changeWeaponStrength(left);
+			enemy.changeWeaponStrength(left);
 			cout << "Mutual Annihilation: " << name << " and " << enemy.name
 				<< " die at each other's hands" << endl; ;
 		}
@@ -70,17 +72,17 @@ private:
 	class Weapon {
 	public:
 
-		Weapon(string weaponNameOf, int weaponStrengthOf) :
+		Weapon(const string& weaponNameOf, int weaponStrengthOf) :
 			weapon_name(weaponNameOf), weapon_strength(weaponStrengthOf) {}
-		
-		string getWeaponName() {
+
+		string getWeaponName()const {
 			return weapon_name;
 		}
-		int getWeaponStrength() {
+		int getWeaponStrength()const {
 			return weapon_strength;
 		}
 		void changeWeaponStrength(int& change) {
-			int weapon_strength = change;
+			weapon_strength = change;
 		}
 
 	private:
@@ -91,7 +93,7 @@ private:
 	string name;
 	string weaponName;
 	int weaponStrength;
-	Weapon theWeapon{ name, weaponStrength };
+	Weapon theWeapon{ weaponName, weaponStrength };
 };
 ostream& operator <<(ostream& os, Warrior& warrior) {
 	os << "Warrior: " << warrior.getName() << ", weapon: "
@@ -109,20 +111,26 @@ void readFile(ifstream& file) {
 	string w2;
 	int strength;
 	vector<Warrior> warriors;
+	//a while loop to check the firstWord and retur different command 
 	while (file >> firstWord) {
+		//add a new Warrior to the warriors collection
 		if (firstWord == "Warrior") {
 			file >> name;
 			file >> weaponName;
 			file >> strength;
 			Warrior aWarrior{ name, weaponName, strength };
 			warriors.push_back(aWarrior);
+			
 		}
+		//print state of the warriors collection
 		else if (firstWord == "Status") {
 			cout << "There are " << warriors.size() << " warriors" << endl;
 			for (size_t i = 0; i < warriors.size(); ++i) {
 				cout << warriors[i];
+				
 			}
 		}
+		// call two warriors to battle and change their states 
 		else if (firstWord == "Battle") {
 			file >> w1;
 			file >> w2;
@@ -139,6 +147,7 @@ void readFile(ifstream& file) {
 	}
 }
 int main() {
+	//read in file and check errors 
 	ifstream file("warriors.txt");
 	if (!file) {
 		cerr << "Failed to open the file!";
