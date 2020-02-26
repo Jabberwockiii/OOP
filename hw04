@@ -1,8 +1,8 @@
 /*
 author: Jacob Xu
 date: 2/23/2020
-purpose: to extend the project of warriors with pointers and 
-other new knowledge 
+purpose: to extend the project of warriors with pointers and
+other new knowledge
 */
 //what do I need for the assignment?
 //a Nobel class, a Warrior class,
@@ -11,36 +11,57 @@ other new knowledge
 //a fire method and a hire method
 //battle rule 
 //operator to print Nobel and warrior 
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+using namespace std;
+
 
 class Warrior {
-public: 
-	Warrior(const string& nameOf, const int& strengthOf):
-		name(nameOf), strength(strengthOf){}
+public:
+	Warrior(const string& nameOf, const int& strengthOf) :
+		name(nameOf), strength(strengthOf), boss(nullptr) {}
+
+	Noble* getBossP() {
+		return boss;
+	}
+
 private:
 	string name;
 	int strength;
+	Noble* boss;
 };
 class Noble {
 
 public:
-	Noble(const string& nameOf): name(nameOf){}
+	Noble(const string& nameOf) : name(nameOf) {}
 
-// methods that interact
+	// methods that interact
 	void battle(Noble& enemy) {
 
 	}
 
-	void hire(Warrior* minion) {
-		army.push_back(&minion);
+	bool hire(Warrior& minion) {
+		if (minion.getBossP() == nullptr) {
+			Warrior* minionP = &minion;
+			army.push_back(minionP);
+			minion.boss = this;
+			return true;
+		}
+		else {
+			return false;
+		}
+		
 	}
 	void fire(Warrior& minion) {
 
 	}
-//method that return self variables
+	//method that return self variables
 private:
 	string name;
 	vector<Warrior*> army;
-
+	bool alived = true;
 };
 ostream& operator <<(ostream& os, const Noble& aNoble) {
 
@@ -48,11 +69,7 @@ ostream& operator <<(ostream& os, const Noble& aNoble) {
 ostream& operator <<(ostream& os, vector<Warrior*> army) {
 
 }
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
-using namespace std;
+
 
 int main() {
 
@@ -106,4 +123,3 @@ int main() {
 	cout << "==========\n";
 
 }
-
