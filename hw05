@@ -1,0 +1,270 @@
+/*
+author: Jacob Xu
+date: 2/29/2020
+purpose:
+to create every class in the heap and handle different errors
+
+*/
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+using namespace std;
+class Warrior {
+	friend ostream& operator <<(ostream& os, const Warrior& aWarrior);
+public:
+	Warrior(const string& nameOf, int strengthOf) :
+		name(nameOf), strength(strengthOf) {
+		warriorP = new Warrior(nameOf, strengthOf);
+	}
+
+	string getName() const {
+		return name;
+	}
+	double getStrength() {
+		return strength;
+	}
+	Warrior* getP() const {
+		return warriorP;
+	}
+	void changeStrength(double percent) {
+		strength *= percent;
+	}
+	// 
+	bool getBoss() {
+		return employed;
+	}
+	void changeBoss() {
+		employed = true;
+	}
+private:
+	string name;
+	double strength;
+	Warrior* warriorP;
+	bool employed = false;
+};
+class Noble {
+	friend ostream& operator <<(ostream& os, const Noble& aNoble);
+public:
+	Noble(const string& nameOf) : name(nameOf) { nobleP = new Noble(name); }
+	//getters
+	string getName() const {
+		return name;
+	}
+	Noble* getP() const {
+		return nobleP;
+	}
+	bool hire(Warrior& minion) {
+		//can only hire when warrior has no lord, noble is alived, and 
+		//the warrior is alived
+		minionP = &minion;
+		if (minion.getBoss() == false && alived == true
+			&& minion.getStrength() != 0) {
+			army.push_back(minionP);
+			minion.changeBoss();
+			return true;
+		}
+		else {
+			return false;
+		}
+
+	}
+	bool fire(Warrior& minion) {
+		if (minion.getBoss() == true && alived == true) {
+			cout << "You don't work for me anymore " << minion.getName() << " -- "
+				<< name << endl;
+			if (army.size() == 1) {
+				army.clear();
+			}
+			// swap the select warrior pointer with the last one and pop the last one
+			else {
+				Warrior* select = &minion;
+				Warrior* last = army[army.size() - 1];
+				for (size_t i = 0; i < army.size(); ++i) {
+					if (army[i] == select) {
+						army[i] = last;
+						army.pop_back();
+					}
+				}
+			}
+			return true;
+
+		}
+		else {
+			return false;
+		}
+	}
+	double getArmyStrength() {
+		double armyStrength = 0;
+		if (army.size() > 0) {
+			for (Warrior* warrior : army) {
+				armyStrength += warrior->getStrength();
+			}
+			return armyStrength;
+		}
+		else {
+			return 0;
+		}
+	}
+	//change each single warrior strength in an army
+	void changeEveryWarriorStrength(double percent) {
+		for (size_t i = 0; i < army.size(); ++i) {
+			army[i]->changeStrength(percent);
+		}
+	}
+	void battle(Noble& enemy) {
+		if (getArmyStrength() == 0 && enemy.getArmyStrength() == 0) {
+			cout << name << " battles " << enemy.getName() << endl;
+			cout << "Oh, NO!  They're both dead! Yuck!" << endl;
+		}
+		else if (getArmyStrength() == 0) {
+			cout << name << " battles " << enemy.getName() << endl;
+			cout << "He's dead, " << enemy.name << endl;
+		}
+		else if (enemy.getArmyStrength() == 0) {
+			cout << name << " battles " << enemy.getName() << endl;
+			cout << "He's dead, " << name << endl;
+		}
+		else if (getArmyStrength() > enemy.getArmyStrength()) {
+			cout << name << " battles " << enemy.getName() << endl;
+			cout << name << " defeats " << enemy.getName() << endl;
+
+			double percent = (enemy.getArmyStrength() / getArmyStrength());
+			changeEveryWarriorStrength((1 - percent));
+			enemy.changeEveryWarriorStrength(0);
+			//change  Noble to dead
+			enemy.alived = false;
+		}
+		else if (getArmyStrength() < enemy.getArmyStrength()) {
+			cout << name << " battles " << enemy.getName() << endl;
+			cout << enemy.getName() << " defeats " << name << endl;
+
+			double percent = getArmyStrength() / enemy.getArmyStrength();
+			changeEveryWarriorStrength(0);
+			enemy.changeEveryWarriorStrength((1 - percent));
+			//change self to dead
+			alived = false;
+
+		}
+		//mutual annihilation
+		else {
+			cout << name << " battles " << enemy.getName() << endl;
+			cout << "Mutual Annihalation: " << name << " and "
+				<< enemy.getName()
+				<< " die at each other's hand" << endl;
+
+			double percent = enemy.getArmyStrength() / getArmyStrength();
+			changeEveryWarriorStrength(0);
+			enemy.changeEveryWarriorStrength(0);
+
+			alived = false;
+			enemy.alived = false;
+		}
+		
+	}
+
+	// destructor 
+	~Noble() { delete nobleP; }
+private:
+	string name;
+	Noble* nobleP;
+	Warrior* minionP;
+	vector<Warrior*> army;
+	bool alived = true;
+};
+
+Noble searchForNoble(vector<Noble*>& nobles, string& name) {
+	for (Noble* aNoble : nobles) {
+		if (aNoble->getName() == name) {
+			return *aNoble;
+		}
+	}
+}
+Warrior searchForWarrior(vector<Warrior*>& warriors, string& name) {
+	for (Warrior* aWarrior : warriors) {
+		if (aWarrior->getName() == name) {
+			return *aWarrior;
+		}
+	}
+}
+
+ostream& operator <<(ostream& os, const Warrior& aWarrior) {
+	os << "         " << aWarrior.name << ": " << aWarrior.strength << endl;
+	return os;
+}
+
+ostream& operator <<(ostream& os, const Noble& aNoble) {
+	os << aNoble.name << " has an army of " << aNoble.army.size() << endl;
+	for (Warrior* warriorP : aNoble.army) {
+		os << *warriorP;
+	}
+	return os;
+}
+
+
+
+void readFile(ifstream& file) {
+	string firstWord;//Noble Warrior Hire Fire Status Battle
+	string nobleName, warriorName, employerName, employeeName;
+	string noble1, noble2;
+	int warriorStrength;
+	vector<Noble*> nobles;
+	vector<Warrior*> warriors;
+	// a while loop to scan everything in
+	while (file >> firstWord) {
+		//if the command is Warrior
+		if (firstWord == "Noble") {
+			file >> nobleName;
+			Noble aNoble{ nobleName };
+			nobles.push_back(aNoble.getP());
+		}
+		else if (firstWord == "Warrior") {
+			file >> warriorName;
+			file >> warriorStrength;
+			Warrior aWarrior{ warriorName, warriorStrength };
+			warriors.push_back(aWarrior.getP());
+		}
+		else if (firstWord == "Hire") {
+			file >> employerName;
+			file >> employeeName;
+			Noble employer = searchForNoble(nobles, employerName);
+			Warrior employee = searchForWarrior(warriors, employeeName);
+			//deal with the error situation
+			employer.hire(employee);
+		}
+		else if (firstWord == "Fire") {
+			file >> employerName;
+			file >> employeeName;
+			//error?
+			Noble employer = searchForNoble(nobles, employerName);
+			Warrior employee = searchForWarrior(warriors, employeeName);
+			//deal with the error situation
+			employer.fire(employee);
+		}
+		else if (firstWord == "Battle") {
+			file >> noble1;
+			file >> noble2;
+			Noble aNoble = searchForNoble(nobles, noble1);
+			Noble bNoble = searchForNoble(nobles, noble2);
+			aNoble.battle(bNoble);
+		}
+		else if (firstWord == "Status") {
+			 
+		}
+		
+
+	}
+
+
+}
+int main() {
+	//read in file and check errors 
+	ifstream file("nobleWarriors.txt");
+	if (!file) {
+		cerr << "Failed to open the file!";
+		exit(1);
+	}
+
+	readFile(file);
+	file.close();
+}
